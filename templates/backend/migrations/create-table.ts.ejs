@@ -1,34 +1,26 @@
 import { QueryInterface, DataTypes } from 'sequelize';
 
-module.exports = {
-  up: async (queryInterface: QueryInterface) => {
-    await queryInterface.createTable('<%= ent.tableName %>', {
-      id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-      },
-      <% ent.columns.forEach(col => { if (!col.primaryKey) { %>
-      <%= col.name %>: {
-        type: DataTypes.<%= col.type.toUpperCase() === 'INCREMENTS' ? 'INTEGER' : col.type.toUpperCase() === 'TEXT' ? 'TEXT' : col.type.toUpperCase() %>,
-        allowNull: <%= !col.required %>,
-        <% if (col.unique) { %>unique: true,<% } %>
-        <% if (col.default !== undefined) { %>defaultValue: '<%= col.default %>',<% } %>
-      },
-      <% } }) %>
-      createdAt: { type: DataTypes.DATE, allowNull: false },
-      updatedAt: { type: DataTypes.DATE, allowNull: false },
-      <% if (ent.softDelete) { %>deletedAt: { type: DataTypes.DATE, allowNull: true }<% } %>
-    });
+export const up = async (queryInterface: QueryInterface) => {
+  await queryInterface.createTable('<%= ent.tableName %>', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    <% ent.columns.forEach(col => { if (!col.primaryKey) { %>
+    <%= col.name %>: {
+      type: DataTypes.<%= col.type.toUpperCase() === 'INCREMENTS' ? 'INTEGER' : col.type.toUpperCase() === 'TEXT' ? 'TEXT' : col.type.toUpperCase() %>,
+      allowNull: <%= !col.required %>,
+      <% if (col.unique) { %>unique: true,<% } %>
+      <% if (col.default !== undefined) { %>defaultValue: '<%= col.default %>',<% } %>
+    },
+    <% } }) %>
+    createdAt: { type: DataTypes.DATE, allowNull: false },
+    updatedAt: { type: DataTypes.DATE, allowNull: false },
+    <% if (ent.softDelete) { %>deletedAt: { type: DataTypes.DATE, allowNull: true }<% } %>
+  });
+};
 
-    <% if (ent.searchable) { %>
-    await queryInterface.sequelize.query(
-      `CREATE FULLTEXT INDEX idx_<%= ent.tableName %>_search ON <%= ent.tableName %> (<%= ent.searchable.join(', ') %>);`
-    );
-    <% } %>
-  },
-
-  down: async (queryInterface: QueryInterface) => {
-    await queryInterface.dropTable('<%= ent.tableName %>');
-  }
+export const down = async (queryInterface: QueryInterface) => {
+  await queryInterface.dropTable('<%= ent.tableName %>');
 };

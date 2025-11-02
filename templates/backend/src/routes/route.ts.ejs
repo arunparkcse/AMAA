@@ -1,7 +1,14 @@
 import { Router } from 'express';
 import * as ctrl from '../controllers/<%= ent.name %>Controller';
+import { authenticate } from '../middleware/auth';
+import upload from '../middleware/upload';
+
 const router = Router();
 
-router.post('/', ctrl.create);
-/* GET, PUT, DELETE … */
+router.post('/', authenticate, upload.single('image'), ctrl.create);
+router.get('/', authenticate, ctrl.getAll);
+router.get('/:id', authenticate, ctrl.getOne);
+router.put('/:id', authenticate, upload.single('image'), ctrl.update);
+router.delete('/:id', authenticate, ctrl.remove);
+
 export default router;

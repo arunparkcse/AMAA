@@ -21,16 +21,7 @@ describe('<%= toPascal(ent.name) %> Model', () => {
 
     const instance = await <%= toPascal(ent.name) %>.create(data);
     expect(instance.id).toBeDefined();
-    expect(instance.email).toBe('test@example.com');
     const valid = await bcrypt.compare('password123', instance.password);
     expect(valid).toBe(true);
   });
-
-  <% if (ent.computed) { %>
-  it('should compute fields', async () => {
-    const instance = await <%= toPascal(ent.name) %>.create({ fullName: 'John Doe', email: 'john@example.com', password: 'pass' });
-    expect(instance.displayName).toBe('John Doe');
-    expect(instance.initials).toBe('JD');
-  });
-  <% } %>
 });

@@ -1,7 +1,7 @@
 import {
   Table, Column, Model, PrimaryKey, AutoIncrement, AllowNull,
   Default, Unique, BelongsTo, ForeignKey, BeforeCreate,
-  BeforeUpdate, AfterFind, Paranoid, Index
+  BeforeUpdate, AfterFind, Paranoid
 } from 'sequelize-typescript';
 import bcrypt from 'bcryptjs';
 import path from 'path';
@@ -9,8 +9,7 @@ import path from 'path';
 @Table({
   tableName: '<%= ent.tableName %>',
   timestamps: true,
-  paranoid: <%= !!ent.softDelete %>,
-  <% if (ent.searchable) { %>indexes: [{ fields: ['<%= ent.searchable.join("','") %>'], type: 'FULLTEXT' }],<% } %>
+  paranoid: <%= !!ent.softDelete %>
 })
 export class <%= toPascal(ent.name) %> extends Model {
   @PrimaryKey
@@ -18,20 +17,14 @@ export class <%= toPascal(ent.name) %> extends Model {
   @Column
   declare id: number;
 
-  <% ent.columns.forEach(col => { %>
-  @Column({ allowNull: <%= !col.required %> <% if (col.unique) { %>, unique: true<% } %> })
+  <% ent.columns.forEach(col => { if (!col.primaryKey) { %>
+  @Column({ allowNull: <%= !col.required %>, <% if (col.unique) { %>unique: true<% } %> })
   declare <%= col.name %>: <%= col.type %>;
-  <% }) %>
+  <% } }) %>
 
   <% ent.computed?.forEach(c => { %>
-  get <%= c.field %>(): any {
+  get <%= c.field %>(): string {
     <%= c.code %>
-  }
-  <% }) %>
-
-  <% ent.methods?.forEach(m => { %>
-  <%= m.name %>() {
-    <%= m.code %>
   }
   <% }) %>
 
