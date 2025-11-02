@@ -1,7 +1,7 @@
 import { QueryInterface, DataTypes } from 'sequelize';
 
-export const up = async (queryInterface: QueryInterface) => {
-  await queryInterface.createTable('<%= ent.tableName %>', {
+export async function up(queryInterface: QueryInterface) {
+  await queryInterface.createTable('<%= ent.tableName || toKebab(ent.name) + "s" %>', {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -12,15 +12,15 @@ export const up = async (queryInterface: QueryInterface) => {
       type: DataTypes.<%= col.type.toUpperCase() === 'INCREMENTS' ? 'INTEGER' : col.type.toUpperCase() === 'TEXT' ? 'TEXT' : col.type.toUpperCase() %>,
       allowNull: <%= !col.required %>,
       <% if (col.unique) { %>unique: true,<% } %>
-      <% if (col.default !== undefined) { %>defaultValue: '<%= col.default %>',<% } %>
+      <% if (col.default !== undefined) { %>defaultValue: <%= JSON.stringify(col.default) %>,<% } %>
     },
     <% } }) %>
     createdAt: { type: DataTypes.DATE, allowNull: false },
     updatedAt: { type: DataTypes.DATE, allowNull: false },
     <% if (ent.softDelete) { %>deletedAt: { type: DataTypes.DATE, allowNull: true }<% } %>
   });
-};
+}
 
-export const down = async (queryInterface: QueryInterface) => {
-  await queryInterface.dropTable('<%= ent.tableName %>');
-};
+export async function down(queryInterface: QueryInterface) {
+  await queryInterface.dropTable('<%= ent.tableName || toKebab(ent.name) + "s" %>');
+}

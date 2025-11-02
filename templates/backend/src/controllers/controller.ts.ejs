@@ -1,21 +1,31 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
 import { <%= toPascal(ent.name) %> } from '../models/<%= ent.name %>';
+import { authenticate } from '../middleware/auth';
+
+declare global {
+  namespace Express {
+    interface Multer {
+      File: any;
+    }
+  }
+}
 
 interface MulterRequest extends Request {
   file?: Express.Multer.File;
 }
 
 export const create = [
-  async (req: MulterRequest, res: Response) => {
+  authenticate,
+  (req: MulterRequest, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
+    next();
+  },
+  async (req: MulterRequest, res: Response) => {
     try {
-      const data = { ...req.body };
-      if (req.file) {
-        data.image = `/uploads/${req.file.filename}`;
-      }
+      const data = { ...req.body, userId: req.user?.id };
+      if (req.file) data.image = `/uploads/${req.file.filename}`;
       const rec = await <%= toPascal(ent.name) %>.create(data);
       res.status(201).json(rec);
     } catch (e: any) {
@@ -24,31 +34,66 @@ export const create = [
   }
 ];
 
-export const getAll = async (req: Request, res: Response) => {
-  const items = await <%= toPascal(ent.name) %>.findAll();
-  res.json(items);
-};
-
-export const getOne = async (req: Request, res: Response) => {
-  const item = await <%= toPascal(ent.name) %>.findByPk(req.params.id);
-  if (!item) return res.status(404).json({ error: 'Not found' });
-  res.json(item);
-};
-
-export const update = [
-  async (req: MulterRequest, res: Response) => {
-    const item = await <%= toPascal(ent.name) %>.findByPk(req.params.id);
-    if (!item) return res.status(404).json({ error: 'Not found' });
-    const data = { ...req.body };
-    if (req.file) data.image = `/uploads/${req.file.filename}`;
-    await item.update(data);
-    res.json(item);
+export const getAll = [
+  authenticate,
+  async (req: Request, res: Response) => {
+    try {
+      const { page = 1, limit = 10 } = req.query;
+      const offset = (Number(page) - 1) * Number(limit);
+      const { count, rows } = await <%= toPascal(ent.name) %>.findAndCountAll({ 
+        limit: Number(limit), offset, paranoid: false 
+      });
+      res.json({ data: rows, pagination: { page: Number(page), limit: Number(limit), total: count } });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
   }
 ];
 
-export const remove = async (req: Request, res: Response) => {
-  const item = await <%= toPascal(ent.name) %>.findByPk(req.params.id);
-  if (!item) return res.status(404).json({ error: 'Not found' });
-  await item.destroy();
-  res.json({ success: true });
-};
+export const getOne = [
+  authenticate,
+  async (req: Request, res: Response) => {
+    try {
+      const item = await <%= toPascal(ent.name) %>.findByPk(req.params.id, { paranoid: false });
+      if (!item) return res.status(404).json({ error: 'Not found' });
+      res.json(item);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  }
+];
+
+export const update = [
+  authenticate,
+  (req: MulterRequest, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    next();
+  },
+  async (req: MulterRequest, res: Response) => {
+    try {
+      const item = await <%= toPascal(ent.name) %>.findByPk(req.params.id);
+      if (!item) return res.status(404).json({ error: 'Not found' });
+      const data = { ...req.body };
+      if (req.file) data.image = `/uploads/${req.file.filename}`;
+      await item.update(data);
+      res.json(item);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  }
+];
+
+export const remove = [
+  authenticate,
+  async (req: Request, res: Response) => {
+    try {
+      const item = await <%= toPascal(ent.name) %>.findByPk(req.params.id);
+      if (!item) return res.status(404).json({ error: 'Not found' });
+      await item.destroy();
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  }
+];

@@ -7,7 +7,7 @@ import bcrypt from 'bcryptjs';
 import path from 'path';
 
 @Table({
-  tableName: '<%= ent.tableName %>',
+  tableName: '<%= ent.tableName || toKebab(ent.name) + "s" %>',
   timestamps: true,
   paranoid: <%= !!ent.softDelete %>
 })
@@ -18,26 +18,35 @@ export class <%= toPascal(ent.name) %> extends Model {
   declare id: number;
 
   <% ent.columns.forEach(col => { if (!col.primaryKey) { %>
-  @Column({ allowNull: <%= !col.required %>, <% if (col.unique) { %>unique: true<% } %> })
-  declare <%= col.name %>: <%= col.type === 'string' ? 'string' : col.type === 'integer' ? 'number' : col.type === 'boolean' ? 'boolean' : 'Date' %>;
+  @Column({ 
+    allowNull: <%= !col.required %>, 
+    <% if (col.unique) { %>unique: true,<% } %>
+    <% if (col.default !== undefined) { %>defaultValue: <%= JSON.stringify(col.default) %>,<% } %>
+  })
+  declare <%= col.name %>: <%= col.type === 'string' ? 'string' : col.type === 'integer' ? 'number' : col.type === 'boolean' ? 'boolean' : col.type === 'dateTime' ? 'Date' : 'any' %>;
   <% } }) %>
 
   <% ent.computed?.forEach(c => { %>
   get <%= c.field %>(): string {
-    const instance = this;
-    <%= c.code %>
+    <%- c.code.replace(/instance\./g, 'this.') %>
+  }
+  <% }) %>
+
+  <% ent.methods?.forEach(m => { %>
+  <%= m.name %>(this: <%= toPascal(ent.name) %>): any {
+    <%- m.code %>
   }
   <% }) %>
 
   <% ent.hooks?.forEach(h => { %>
   @<%= h.event.charAt(0).toUpperCase() + h.event.slice(1) %>
   static async <%= h.event %>(instance: <%= toPascal(ent.name) %>) {
-    <%= h.code %>
+    <%- h.code.replace(/instance\./g, 'this.') %>
   }
   <% }) %>
 }
 
-// Relationships
+// Associations
 <% ent.relationships?.forEach(r => { %>
-<%= toPascal(ent.name) %>.<%= r.type %>(<%= toPascal(r.target) %>);
+<%= toPascal(ent.name) %>.<%= r.type %>(require('./<%= toKebab(r.target) %>'));
 <% }) %>

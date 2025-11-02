@@ -5,10 +5,10 @@ import upload from '../middleware/upload';
 
 const router = Router();
 
-router.post('/', authenticate, upload.single('image'), ctrl.create);
-router.get('/', authenticate, ctrl.getAll);
-router.get('/:id', authenticate, ctrl.getOne);
-router.put('/:id', authenticate, upload.single('image'), ctrl.update);
-router.delete('/:id', authenticate, ctrl.remove);
+router.post('/', ctrl.create);
+router.get('/', ctrl.getAll);
+router.get('/:id', ctrl.getOne);
+router.put('/:id', ctrl.update);
+router.delete('/:id', ctrl.remove);
 
 export default router;

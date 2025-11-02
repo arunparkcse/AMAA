@@ -1,13 +1,13 @@
 import { Router } from 'express';
-import { authenticate } from '../middleware/auth';
+import authRoutes from './auth';
 <% entities.forEach(ent => { %>
-import <%= toKebab(ent.name).replace(/^-/, '') %>Router from './<%= toKebab(ent.name) %>';
+import <%= toCamel(ent.name) %>Routes from './<%= toKebab(ent.name) %>';
 <% }) %>
 
 const router = Router();
-
+router.use('/auth', authRoutes);
 <% entities.forEach(ent => { %>
-router.use('/<%= toKebab(ent.name) %>', authenticate, <%= toKebab(ent.name).replace(/^-/, '') %>Router);
+router.use('/<%= toKebab(ent.name) %>', <%= toCamel(ent.name) %>Routes);
 <% }) %>
 
 export default router;
