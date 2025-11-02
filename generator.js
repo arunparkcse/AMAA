@@ -145,8 +145,8 @@ if (enableGraphQL) {
 render('frontend/package.json.ejs', `${FRONT}/package.json`, { schema });
 render('frontend/angular.json.ejs', `${FRONT}/angular.json`, { projectName, schema });
 render('frontend/tsconfig.json.ejs', `${FRONT}/tsconfig.json`, {});
-render('frontend/src/index.html.ejs', `${FRONT}/src/index.html`, { projectName });
-render('frontend/src/main.ts.ejs', `${FRONT}/src/main.ts`, { enableAdmin, enableGraphQL });
+render('frontend/src/index.html.ejs', `${FRONT}/src/index.html`, { schema });
+render('frontend/src/main.ts.ejs', `${FRONT}/src/main.ts`, { schema });
 render('frontend/src/polyfills.ts.ejs', `${FRONT}/src/polyfills.ts`, {});
 render('frontend/src/styles.scss.ejs', `${FRONT}/src/styles.scss`, { enableAdmin });
 

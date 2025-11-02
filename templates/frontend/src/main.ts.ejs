@@ -4,10 +4,10 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app-routing.module';
-<% if (enableAdmin) { %>
+<% if (schema.enableAdmin) { %>
 import { NbThemeModule, NbLayoutModule } from '@nebular/theme';
 <% } %>
-<% if (enableGraphQL) { %>
+<% if (schema.enableGraphQL) { %>
 import { provideApollo } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
 import { InMemoryCache } from '@apollo/client/core';
@@ -21,10 +21,10 @@ bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes),
     provideHttpClient(withInterceptorsFromDi()),
-    <% if (enableAdmin) { %>
+    <% if (schema.enableAdmin) { %>
     importProvidersFrom(NbThemeModule.forRoot({ name: 'default' }), NbLayoutModule),
     <% } %>
-    <% if (enableGraphQL) { %>
+    <% if (schema.enableGraphQL) { %>
     provideApollo(() => {
       const httpLink = new HttpLink({ uri: '/graphql' });
       return { link: httpLink, cache: new InMemoryCache() };

@@ -1,5 +1,5 @@
 {
-  "name": "<%= projectName %>-frontend",
+  "name": "<%= schema.projectName %>-frontend",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -20,13 +20,13 @@
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.0",
-    <% if (enableAdmin) { %>
+    <% if (schema.enableAdmin) { %>
     "@nebular/theme": "^12.0.0",
     "@nebular/eva-icons": "^12.0.0",
     "eva-icons": "^1.1.3",
     "ng2-smart-table": "^1.9.0",
     <% } %>
-    <% if (enableGraphQL) { %>
+    <% if (schema.enableGraphQL) { %>
     "apollo-angular": "^6.0.0",
     "@apollo/client": "^3.8.8",
     "graphql": "^16.8.1",
