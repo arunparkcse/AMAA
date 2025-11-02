@@ -1,7 +1,7 @@
 import {
   Table, Column, Model, PrimaryKey, AutoIncrement, AllowNull,
   Default, Unique, BelongsTo, ForeignKey, BeforeCreate,
-  BeforeUpdate, AfterFind, Paranoid
+  BeforeUpdate, AfterFind, Paranoid, BeforeSave
 } from 'sequelize-typescript';
 import bcrypt from 'bcryptjs';
 import path from 'path';
@@ -19,11 +19,12 @@ export class <%= toPascal(ent.name) %> extends Model {
 
   <% ent.columns.forEach(col => { if (!col.primaryKey) { %>
   @Column({ allowNull: <%= !col.required %>, <% if (col.unique) { %>unique: true<% } %> })
-  declare <%= col.name %>: <%= col.type %>;
+  declare <%= col.name %>: <%= col.type === 'string' ? 'string' : col.type === 'integer' ? 'number' : col.type === 'boolean' ? 'boolean' : 'Date' %>;
   <% } }) %>
 
   <% ent.computed?.forEach(c => { %>
   get <%= c.field %>(): string {
+    const instance = this;
     <%= c.code %>
   }
   <% }) %>
@@ -36,6 +37,7 @@ export class <%= toPascal(ent.name) %> extends Model {
   <% }) %>
 }
 
+// Relationships
 <% ent.relationships?.forEach(r => { %>
 <%= toPascal(ent.name) %>.<%= r.type %>(<%= toPascal(r.target) %>);
 <% }) %>
