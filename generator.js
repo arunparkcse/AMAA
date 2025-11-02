@@ -130,6 +130,8 @@ for (const ent of entities) {
   render('backend/src/controllers/controller.ts.ejs', `${BACK}/src/controllers/${ent.name}Controller.ts`, { ent, schema });
   render('backend/src/routes/route.ts.ejs', `${BACK}/src/routes/${toKebab(ent.name)}.ts`, { ent, schema });
 }
+// Add this line in generator.js (after routes)
+render('backend/src/routes/auth.ts.ejs', `${BACK}/src/routes/auth.ts`, { schema });
 render('backend/src/routes/index.ts.ejs', `${BACK}/src/routes/index.ts`, { entities, schema });
 
 if (enableGraphQL) {
