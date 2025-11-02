@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
-<% if (enableAdmin) { %>
+<% if (schema.adminPanel) { %>
 import {
   NbThemeModule, NbLayoutModule, NbSidebarModule, NbMenuModule,
   NbCardModule, NbButtonModule, NbInputModule, NbDialogModule,
@@ -11,7 +11,7 @@ import {
 } from '@nebular/theme';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
 <% } %>
-<% if (enableGraphQL) { %>
+<% if (schema.graphql) { %>
 import { APOLLO_OPTIONS } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
 import { InMemoryCache } from '@apollo/client/core';
@@ -30,7 +30,7 @@ import { AuthService } from './core/auth/auth.service';
     BrowserAnimationsModule,
     HttpClientModule,
     AppRoutingModule,
-    <% if (enableAdmin) { %>
+    <% if (schema.adminPanel) { %>
     NbThemeModule.forRoot({ name: 'default' }),
     NbLayoutModule,
     NbEvaIconsModule,
@@ -47,7 +47,7 @@ import { AuthService } from './core/auth/auth.service';
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     AuthGuard,
     AuthService,
-    <% if (enableGraphQL) { %>
+    <% if (schema.graphql) { %>
     {
       provide: APOLLO_OPTIONS,
       useFactory: (httpLink: HttpLink) => ({

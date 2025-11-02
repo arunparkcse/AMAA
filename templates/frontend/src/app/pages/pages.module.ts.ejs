@@ -5,7 +5,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 
 const routes = [
   { path: 'dashboard', component: DashboardComponent },
-  <% entities.forEach(ent => { %>
+  <% schema.entities.forEach(ent => { %>
   { path: '<%= toKebab(ent.name) %>', loadChildren: () => import('../features/<%= toKebab(ent.name) %>/<%= toKebab(ent.name) %>.module').then(m => m.<%= toPascal(ent.name) %>Module) },
   <% }) %>
 ];

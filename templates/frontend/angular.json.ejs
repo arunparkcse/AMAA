@@ -39,8 +39,8 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
-            "production": { "buildTarget": "<%= projectName %>:build:production" },
-            "development": { "buildTarget": "<%= projectName %>:build:development" }
+            "production": { "buildTarget": "<%= schema.projectName %>:build:production" },
+            "development": { "buildTarget": "<%= schema.projectName %>:build:development" }
           },
           "defaultConfiguration": "development"
         },

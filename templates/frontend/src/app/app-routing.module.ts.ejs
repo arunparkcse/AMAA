@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/auth/auth.guard';
-<% if (enableAdmin) { %>
+<% if (schema.adminPanel) { %>
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 <% } %>
 
 const routes: Routes = [
   { path: 'login', loadChildren: () => import('./core/auth/auth.module').then(m => m.AuthModule) },
-  <% if (enableAdmin) { %>
+  <% if (schema.adminPanel) { %>
   { path: 'pages', loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule), canActivate: [AuthGuard] },
   { path: '', redirectTo: 'pages', pathMatch: 'full' },
   <% } else { %>

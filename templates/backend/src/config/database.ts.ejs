@@ -4,13 +4,13 @@ import path from 'path';
 const env = process.env.NODE_ENV || 'development';
 let sequelize: Sequelize;
 
-if (env === 'test' || <%= dbTest === 'sqlite' %>) {
+if (env === 'test' || <%= schema.dbTest === 'sqlite' %>) {
   sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: path.join(__dirname, '../../test.sqlite'),
     logging: false,
   });
-} else if (env === 'development' && <%= dbDev === 'sqlite' %>) {
+} else if (env === 'development' && <%= schema.dbDev === 'sqlite' %>) {
   sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: path.join(__dirname, '../../dev.sqlite'),

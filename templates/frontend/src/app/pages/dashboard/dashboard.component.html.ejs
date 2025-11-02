@@ -3,7 +3,7 @@
   <nb-card-body>
     <p>Welcome to the admin panel!</p>
     <div class="stats">
-      <% entities.forEach(ent => { %>
+      <% schema.entities.forEach(ent => { %>
       <nb-card size="tiny">
         <nb-card-body><%= toPascal(ent.name) %> Count: {{ <%= toCamel(ent.name) %>Count }}</nb-card-body>
       </nb-card>

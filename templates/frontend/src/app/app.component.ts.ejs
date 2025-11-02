@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-<% if (enableAdmin) { %>
+<% if (schema.adminPanel) { %>
 import { NbMenuItem } from '@nebular/theme';
 <% } %>
 
@@ -8,10 +8,10 @@ import { NbMenuItem } from '@nebular/theme';
   templateUrl: './app.component.html'
 })
 export class AppComponent {
-  <% if (enableAdmin) { %>
+  <% if (schema.adminPanel) { %>
   menuItems: NbMenuItem[] = [
     { title: 'Dashboard', link: '/pages/dashboard', icon: 'home-outline' },
-    <% entities.forEach(ent => { %>
+    <% schema.entities.forEach(ent => { %>
     { title: '<%= toPascal(ent.name) %>', link: '/pages/<%= toKebab(ent.name) %>', icon: 'grid-outline' },
     <% }) %>
     { title: 'Logout', link: '/login', icon: 'log-out-outline' }

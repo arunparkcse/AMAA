@@ -3,7 +3,7 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_DB: <%= projectName.toLowerCase() %>
+      POSTGRES_DB: <%= schema.projectName.toLowerCase() %>
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     volumes:
@@ -14,7 +14,7 @@ services:
     build: ./backend
     ports: ["3000:3000"]
     environment:
-      DATABASE_URL: postgres://postgres:password@db:5432/<%= projectName.toLowerCase() %>
+      DATABASE_URL: postgres://postgres:password@db:5432/<%= schema.projectName.toLowerCase() %>
       JWT_SECRET: supersecret
       NODE_ENV: development
     depends_on: [db]

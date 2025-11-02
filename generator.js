@@ -4,7 +4,6 @@
  *  -------------------------------------------------
  *  One JSON schema → Docker + Terraform + Ngx-Admin
  *  -------------------------------------------------
- *  Copy this file as generator.js
  *  npm i fs-extra ejs commander
  *  node generator.js --schema schema.json --output my-app
  */
@@ -83,26 +82,26 @@ const dirs = [
   `${FRONT}/src/app/features`,
   `${FRONT}/src/app/shared`,
 ];
-if (enableAdmin) dirs.push(`${FRONT}/src/app/@theme/layouts`, `${FRONT}/src/app/pages`);
-if (enableTerraform) dirs.push(`${outDir}/terraform`);
+if (adminPanel) dirs.push(`${FRONT}/src/app/@theme/layouts`, `${FRONT}/src/app/pages`);
+if (terraform) dirs.push(`${outDir}/terraform`);
 dirs.forEach(d => fs.ensureDirSync(d));
 
 // ---------------------------------------------------------------------
 // ROOT files (Docker, CI, Terraform)
 // ---------------------------------------------------------------------
 if (docker) {
-  render('docker/Dockerfile.backend', `${BACK}/Dockerfile`, { projectName });
-  render('docker/Dockerfile.frontend', `${FRONT}/Dockerfile`, { projectName });
-  render('docker/docker-compose.yml', `${outDir}/docker-compose.yml`, { projectName, schema });
+  render('docker/Dockerfile.backend', `${BACK}/Dockerfile`, { schema });
+  render('docker/Dockerfile.frontend', `${FRONT}/Dockerfile`, { schema });
+  render('docker/docker-compose.yml', `${outDir}/docker-compose.yml`, { schema });
 }
 if (ci) {
-  render('ci/github-workflow.yml', `${outDir}/.github/workflows/ci.yml`, { projectName, enableTerraform });
+  render('ci/github-workflow.yml', `${outDir}/.github/workflows/ci.yml`, { schema });
 }
 if (terraform) {
-  render('terraform/main.tf', `${outDir}/terraform/main.tf`, { projectName, schema });
-  render('terraform/variables.tf', `${outDir}/terraform/variables.tf`, { projectName });
-  render('terraform/outputs.tf', `${outDir}/terraform/outputs.tf`, { projectName });
-  render('terraform/terraform.tfvars.example', `${outDir}/terraform/terraform.tfvars.example`, { projectName });
+  render('terraform/main.tf', `${outDir}/terraform/main.tf`, { schema });
+  render('terraform/variables.tf', `${outDir}/terraform/variables.tf`, { schema });
+  render('terraform/outputs.tf', `${outDir}/terraform/outputs.tf`, { schema });
+  render('terraform/terraform.tfvars.example', `${outDir}/terraform/terraform.tfvars.example`, { schema });
 }
 
 // ---------------------------------------------------------------------
@@ -113,75 +112,76 @@ render('backend/tsconfig.json.ejs', `${BACK}/tsconfig.json`, {});
 render('backend/.env.example', `${BACK}/.env.example`, { schema });
 render('backend/src/server.ts.ejs', `${BACK}/src/server.ts`, { schema });
 
-render('backend/src/config/database.ts.ejs', `${BACK}/src/config/database.ts`, { dbDev, dbTest });
-render('backend/src/middleware/auth.ts.ejs', `${BACK}/src/middleware/auth.ts`, { authEntity });
-render('backend/src/middleware/upload.ts.ejs', `${BACK}/src/middleware/upload.ts`, {});
-render('backend/src/middleware/error.ts.ejs', `${BACK}/src/middleware/error.ts`, {});
+render('backend/src/config/database.ts.ejs', `${BACK}/src/config/database.ts`, { schema });
+render('backend/src/middleware/auth.ts.ejs', `${BACK}/src/middleware/auth.ts`, { schema });
+render('backend/src/middleware/upload.ts.ejs', `${BACK}/src/middleware/upload.ts`, { schema });
+render('backend/src/middleware/error.ts.ejs', `${BACK}/src/middleware/error.ts`, { schema });
+render('backend/src/routes/auth.ts.ejs', `${BACK}/src/routes/auth.ts`, { schema });
 
 // Models + migrations + tests
 for (const ent of entities) {
   render('backend/src/models/model.ts.ejs', `${BACK}/src/models/${ent.name}.ts`, { ent, schema });
-  render('backend/migrations/create-table.ts.ejs', `${BACK}/migrations/${Date.now()}-create-${ent.tableName}.ts`, { ent });
-  render('backend/tests/model.test.ts.ejs', `${BACK}/tests/${ent.name}.test.ts`, { ent });
+  render('backend/migrations/create-table.ts.ejs', `${BACK}/migrations/${Date.now()}-create-${ent.tableName}.ts`, { ent, schema });
+  render('backend/tests/model.test.ts.ejs', `${BACK}/tests/${ent.name}.test.ts`, { ent, schema });
 }
 
 // Controllers + routes
 for (const ent of entities) {
-  render('backend/src/controllers/controller.ts.ejs', `${BACK}/src/controllers/${ent.name}Controller.ts`, { ent, schema });
-  render('backend/src/routes/route.ts.ejs', `${BACK}/src/routes/${toKebab(ent.name)}.ts`, { ent, schema });
+  const name = ent.name;
+  const kebab = toKebab(name);
+  render('backend/src/controllers/controller.ts.ejs', `${BACK}/src/controllers/${name}Controller.ts`, { ent, schema });
+  render('backend/src/routes/route.ts.ejs', `${BACK}/src/routes/${kebab}.ts`, { ent, schema });
 }
-// Add this line in generator.js (after routes)
-render('backend/src/routes/auth.ts.ejs', `${BACK}/src/routes/auth.ts`, { schema });
 render('backend/src/routes/index.ts.ejs', `${BACK}/src/routes/index.ts`, { entities, schema });
 
-if (enableGraphQL) {
-  render('backend/src/graphql/typeDefs.ts.ejs', `${BACK}/src/graphql/typeDefs.ts`, { entities });
-  render('backend/src/graphql/resolvers.ts.ejs', `${BACK}/src/graphql/resolvers.ts`, { entities, authEntity });
+if (graphql) {
+  render('backend/src/graphql/typeDefs.ts.ejs', `${BACK}/src/graphql/typeDefs.ts`, { entities, schema });
+  render('backend/src/graphql/resolvers.ts.ejs', `${BACK}/src/graphql/resolvers.ts`, { entities, schema, authEntity });
 }
 
 // ---------------------------------------------------------------------
 // FRONTEND
 // ---------------------------------------------------------------------
 render('frontend/package.json.ejs', `${FRONT}/package.json`, { schema });
-render('frontend/angular.json.ejs', `${FRONT}/angular.json`, { projectName, schema });
+render('frontend/angular.json.ejs', `${FRONT}/angular.json`, { schema });
 render('frontend/tsconfig.json.ejs', `${FRONT}/tsconfig.json`, {});
 render('frontend/src/index.html.ejs', `${FRONT}/src/index.html`, { schema });
 render('frontend/src/main.ts.ejs', `${FRONT}/src/main.ts`, { schema });
 render('frontend/src/polyfills.ts.ejs', `${FRONT}/src/polyfills.ts`, {});
-render('frontend/src/styles.scss.ejs', `${FRONT}/src/styles.scss`, { enableAdmin });
+render('frontend/src/styles.scss.ejs', `${FRONT}/src/styles.scss`, { schema });
 
-render('frontend/src/app/app.module.ts.ejs', `${FRONT}/src/app/app.module.ts`, { entities, enableAdmin, enableGraphQL });
-render('frontend/src/app/app-routing.module.ts.ejs', `${FRONT}/src/app/app-routing.module.ts`, { entities, enableAdmin });
-render('frontend/src/app/app.component.html.ejs', `${FRONT}/src/app/app.component.html`, { enableAdmin });
-render('frontend/src/app/app.component.ts.ejs', `${FRONT}/src/app/app.component.ts`, { enableAdmin });
+render('frontend/src/app/app.module.ts.ejs', `${FRONT}/src/app/app.module.ts`, { schema });
+render('frontend/src/app/app-routing.module.ts.ejs', `${FRONT}/src/app/app-routing.module.ts`, { schema });
+render('frontend/src/app/app.component.html.ejs', `${FRONT}/src/app/app.component.html`, { schema });
+render('frontend/src/app/app.component.ts.ejs', `${FRONT}/src/app/app.component.ts`, { schema });
 
 // Auth core
-render('frontend/src/app/core/auth/auth.service.ts.ejs', `${FRONT}/src/app/core/auth/auth.service.ts`, { authEntity });
-render('frontend/src/app/core/auth/jwt.interceptor.ts.ejs', `${FRONT}/src/app/core/auth/jwt.interceptor.ts`, {});
-render('frontend/src/app/core/auth/auth.guard.ts.ejs', `${FRONT}/src/app/core/auth/auth.guard.ts`, {});
+render('frontend/src/app/core/auth/auth.service.ts.ejs', `${FRONT}/src/app/core/auth/auth.service.ts`, { schema });
+render('frontend/src/app/core/auth/jwt.interceptor.ts.ejs', `${FRONT}/src/app/core/auth/jwt.interceptor.ts`, { schema });
+render('frontend/src/app/core/auth/auth.guard.ts.ejs', `${FRONT}/src/app/core/auth/auth.guard.ts`, { schema });
 
-// Feature modules (one per entity)
+// Feature modules
 for (const ent of entities) {
   const name = ent.name;
   const kebab = toKebab(name);
   const featurePath = `${FRONT}/src/app/features/${kebab}`;
   fs.ensureDirSync(featurePath);
 
-  render('frontend/src/app/features/entity/entity.module.ts.ejs', `${featurePath}/${kebab}.module.ts`, { ent, name, kebab, enableAdmin, enableGraphQL });
-  render('frontend/src/app/features/entity/entity.service.ts.ejs', `${featurePath}/${kebab}.service.ts`, { ent, name, kebab, enableGraphQL });
-  render('frontend/src/app/features/entity/entity-list.component.html.ejs', `${featurePath}/${kebab}-list.component.html`, { ent, name, kebab, enableAdmin });
-  render('frontend/src/app/features/entity/entity-list.component.ts.ejs', `${featurePath}/${kebab}-list.component.ts`, { ent, name, kebab, enableAdmin, enableGraphQL });
-  render('frontend/src/app/features/entity/entity-form.component.html.ejs', `${featurePath}/${kebab}-form.component.html`, { ent, name, kebab, enableAdmin });
-  render('frontend/src/app/features/entity/entity-form.component.ts.ejs', `${featurePath}/${kebab}-form.component.ts`, { ent, name, kebab, enableAdmin, enableGraphQL });
+  render('frontend/src/app/features/entity/entity.module.ts.ejs', `${featurePath}/${kebab}.module.ts`, { ent, name, kebab, schema });
+  render('frontend/src/app/features/entity/entity.service.ts.ejs', `${featurePath}/${kebab}.service.ts`, { ent, name, kebab, schema });
+  render('frontend/src/app/features/entity/entity-list.component.html.ejs', `${featurePath}/${kebab}-list.component.html`, { ent, name, kebab, schema });
+  render('frontend/src/app/features/entity/entity-list.component.ts.ejs', `${featurePath}/${kebab}-list.component.ts`, { ent, name, kebab, schema });
+  render('frontend/src/app/features/entity/entity-form.component.html.ejs', `${featurePath}/${kebab}-form.component.html`, { ent, name, kebab, schema });
+  render('frontend/src/app/features/entity/entity-form.component.ts.ejs', `${featurePath}/${kebab}-form.component.ts`, { ent, name, kebab, schema });
 }
 
-// Ngx-Admin specific files
-if (enableAdmin) {
-  render('frontend/src/app/@theme/@theme.module.ts.ejs', `${FRONT}/src/app/@theme/@theme.module.ts`, {});
-  render('frontend/src/app/@theme/styles/themes.scss.ejs', `${FRONT}/src/app/@theme/styles/themes.scss`, {});
-  render('frontend/src/app/pages/pages.module.ts.ejs', `${FRONT}/src/app/pages/pages.module.ts`, { entities });
-  render('frontend/src/app/pages/dashboard/dashboard.component.html.ejs', `${FRONT}/src/app/pages/dashboard/dashboard.component.html`, {});
-  render('frontend/src/app/pages/dashboard/dashboard.component.ts.ejs', `${FRONT}/src/app/pages/dashboard/dashboard.component.ts`, { entities });
+// Ngx-Admin pages
+if (adminPanel) {
+  render('frontend/src/app/@theme/@theme.module.ts.ejs', `${FRONT}/src/app/@theme/@theme.module.ts`, { schema });
+  render('frontend/src/app/@theme/styles/themes.scss.ejs', `${FRONT}/src/app/@theme/styles/themes.scss`, { schema });
+  render('frontend/src/app/pages/pages.module.ts.ejs', `${FRONT}/src/app/pages/pages.module.ts`, { schema });
+  render('frontend/src/app/pages/dashboard/dashboard.component.html.ejs', `${FRONT}/src/app/pages/dashboard/dashboard.component.html`, { schema });
+  render('frontend/src/app/pages/dashboard/dashboard.component.ts.ejs', `${FRONT}/src/app/pages/dashboard/dashboard.component.ts`, { schema });
 }
 
 // ---------------------------------------------------------------------

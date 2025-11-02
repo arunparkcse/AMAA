@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-<% if (enableGraphQL) { %>
+<% if (schema.graphql) { %>
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 <% } %>
@@ -8,16 +8,16 @@ import gql from 'graphql-tag';
 @Injectable({ providedIn: 'root' })
 export class <%= toPascal(name) %>Service {
   private api = '/api/<%= toKebab(name) %>';
-  <% if (enableGraphQL) { %>
+  <% if (schema.graphql) { %>
   private GET_ALL = gql`query { <%= toCamel(name) %>s { id <% ent.columns.forEach(c => { if (c.ui?.visible) { %> <%= c.name %> <% } }) %> } }`;
   <% } %>
 
   constructor(
     private http: HttpClient
-    <% if (enableGraphQL) { %>, private apollo: Apollo <% } %>
+    <% if (schema.graphql) { %>, private apollo: Apollo <% } %>
   ) {}
 
-  <% if (enableGraphQL) { %>
+  <% if (schema.graphql) { %>
   getAll() { return this.apollo.watchQuery({ query: this.GET_ALL }).valueChanges; }
   <% } else { %>
   getAll() { return this.http.get<any[]>(this.api); }
