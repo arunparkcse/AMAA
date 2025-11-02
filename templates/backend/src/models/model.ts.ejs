@@ -1,0 +1,48 @@
+import {
+  Table, Column, Model, PrimaryKey, AutoIncrement, AllowNull,
+  Default, Unique, BelongsTo, ForeignKey, BeforeCreate,
+  BeforeUpdate, AfterFind, Paranoid, Index
+} from 'sequelize-typescript';
+import bcrypt from 'bcryptjs';
+import path from 'path';
+
+@Table({
+  tableName: '<%= ent.tableName %>',
+  timestamps: true,
+  paranoid: <%= !!ent.softDelete %>,
+  <% if (ent.searchable) { %>indexes: [{ fields: ['<%= ent.searchable.join("','") %>'], type: 'FULLTEXT' }],<% } %>
+})
+export class <%= toPascal(ent.name) %> extends Model {
+  @PrimaryKey
+  @AutoIncrement
+  @Column
+  declare id: number;
+
+  <% ent.columns.forEach(col => { %>
+  @Column({ allowNull: <%= !col.required %> <% if (col.unique) { %>, unique: true<% } %> })
+  declare <%= col.name %>: <%= col.type %>;
+  <% }) %>
+
+  <% ent.computed?.forEach(c => { %>
+  get <%= c.field %>(): any {
+    <%= c.code %>
+  }
+  <% }) %>
+
+  <% ent.methods?.forEach(m => { %>
+  <%= m.name %>() {
+    <%= m.code %>
+  }
+  <% }) %>
+
+  <% ent.hooks?.forEach(h => { %>
+  @<%= h.event.charAt(0).toUpperCase() + h.event.slice(1) %>
+  static async <%= h.event %>(instance: <%= toPascal(ent.name) %>) {
+    <%= h.code %>
+  }
+  <% }) %>
+}
+
+<% ent.relationships?.forEach(r => { %>
+<%= toPascal(ent.name) %>.<%= r.type %>(<%= toPascal(r.target) %>);
+<% }) %>

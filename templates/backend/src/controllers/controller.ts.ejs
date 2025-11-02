@@ -1,0 +1,21 @@
+import { Request, Response } from 'express';
+import { validationResult } from 'express-validator';
+import upload from '../middleware/upload';
+import { <%= toPascal(ent.name) %> } from '../models/<%= ent.name %>';
+
+export const create = [
+  upload.single('file'),
+  ...([]), // add express-validator rules here if needed
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    try {
+      const data = { ...req.body };
+      if (req.file) data[req.file.fieldname] = `/uploads/${req.file.filename}`;
+      const rec = await <%= toPascal(ent.name) %>.create(data);
+      res.status(201).json(rec);
+    } catch (e) { res.status(500).json({ error: (e as Error).message }); }
+  }
+];
+/* add getAll, getOne, update, destroy similarly */

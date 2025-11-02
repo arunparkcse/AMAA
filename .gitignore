@@ -1,0 +1,17 @@
+# Ignore node_modules directory
+node_modules/
+
+# Ignore dist directory
+dist/
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov
+
+# cache
+.cache
+
+# sonar exclusion
+.scannerwork
+sonar-project.properties
+package-lock.json
+launch.json

@@ -1,0 +1,22 @@
+<div class="container">
+  <h2>{{ isEdit ? 'Edit' : 'Create' }} <%= toPascal(name) %></h2>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <% ent.columns.forEach(col => { if (col.ui?.visible !== false) { %>
+    <div class="field">
+      <label><%= toPascal(col.name) %></label>
+      <% if (col.ui?.input === 'file') { %>
+      <input type="file" (change)="onFile($event)">
+      <% } else if (col.ui?.input === 'select' && col.ui?.options) { %>
+      <select formControlName="<%= col.name %>">
+        <% col.ui.options.forEach(opt => { %>
+        <option value="<%= opt.value %>"><%= opt.display %></option>
+        <% }) %>
+      </select>
+      <% } else { %>
+      <input [type]="getType('<%= col.ui?.input %>')" formControlName="<%= col.name %>">
+      <% } %>
+    </div>
+    <% } }) %>
+    <button type="submit">Save</button>
+  </form>
+</div>

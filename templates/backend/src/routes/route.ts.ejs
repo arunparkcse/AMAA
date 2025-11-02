@@ -1,0 +1,7 @@
+import { Router } from 'express';
+import * as ctrl from '../controllers/<%= ent.name %>Controller';
+const router = Router();
+
+router.post('/', ctrl.create);
+/* GET, PUT, DELETE … */
+export default router;

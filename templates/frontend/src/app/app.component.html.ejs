@@ -1,0 +1,13 @@
+<% if (enableAdmin) { %>
+<nb-layout>
+  <nb-sidebar class="menu-sidebar" tag="menu-sidebar" responsive>
+    <nb-menu [items]="menuItems"></nb-menu>
+  </nb-sidebar>
+
+  <nb-layout-column>
+    <router-outlet></router-outlet>
+  </nb-layout-column>
+</nb-layout>
+<% } else { %>
+<router-outlet></router-outlet>
+<% } %>

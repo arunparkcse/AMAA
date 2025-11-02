@@ -1,0 +1,61 @@
+name: CI/CD
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: testdb
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: cd backend && npm ci && npx tsc && npm test
+        env:
+          DATABASE_URL: postgres://postgres:password@localhost:5432/testdb
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: cd backend && npm ci && npx tsc
+      - run: cd frontend && npm ci && npm run build --prod
+      - name: Build & push Docker images
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+          docker build -t ghcr.io/${{ github.repository }}-backend:latest ./backend
+          docker build -t ghcr.io/${{ github.repository }}-frontend:latest ./frontend
+          docker push ghcr.io/${{ github.repository }}-backend:latest
+          docker push ghcr.io/${{ github.repository }}-frontend:latest
+      <% if (enableTerraform) { %>
+      - name: Terraform Apply
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+      - run: |
+          cd terraform
+          terraform init
+          terraform apply -auto-approve
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      <% } %>

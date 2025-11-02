@@ -1,0 +1,17 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { DashboardComponent } from './dashboard/dashboard.component';
+
+const routes = [
+  { path: 'dashboard', component: DashboardComponent },
+  <% entities.forEach(ent => { %>
+  { path: '<%= toKebab(ent.name) %>', loadChildren: () => import('../features/<%= toKebab(ent.name) %>/<%= toKebab(ent.name) %>.module').then(m => m.<%= toPascal(ent.name) %>Module) },
+  <% }) %>
+];
+
+@NgModule({
+  declarations: [DashboardComponent],
+  imports: [CommonModule, RouterModule.forChild(routes)]
+})
+export class PagesModule { }

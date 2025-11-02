@@ -1,0 +1,26 @@
+import { Sequelize } from 'sequelize-typescript';
+import path from 'path';
+
+const env = process.env.NODE_ENV || 'development';
+let sequelize: Sequelize;
+
+if (env === 'test' || <%= dbTest === 'sqlite' %>) {
+  sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: path.join(__dirname, '../../test.sqlite'),
+    logging: false,
+  });
+} else if (env === 'development' && <%= dbDev === 'sqlite' %>) {
+  sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: path.join(__dirname, '../../dev.sqlite'),
+  });
+} else {
+  sequelize = new Sequelize(process.env.DATABASE_URL!, {
+    dialect: 'postgres',
+    logging: false,
+  });
+}
+
+sequelize.addModels([path.join(__dirname, '../models')]);
+export { sequelize };

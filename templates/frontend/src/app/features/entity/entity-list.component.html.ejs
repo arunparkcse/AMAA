@@ -1,0 +1,26 @@
+<div class="container">
+  <h2><%= toPascal(name) %> List</h2>
+  <button routerLink="new">Add New</button>
+
+  <table>
+    <thead>
+      <tr>
+        <% ent.columns.forEach(col => { if (col.ui?.visible) { %>
+        <th><%= toPascal(col.name) %></th>
+        <% } }) %>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of items">
+        <% ent.columns.forEach(col => { if (col.ui?.visible) { %>
+        <td>{{ item.<%= col.name %> }}</td>
+        <% } }) %>
+        <td>
+          <button [routerLink]="[item.id]">Edit</button>
+          <button (click)="delete(item.id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

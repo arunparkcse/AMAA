@@ -1,0 +1,28 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+import { RouterModule, Routes } from '@angular/router';
+<% if (enableAdmin) { %>
+import { NbCardModule, NbButtonModule, NbInputModule } from '@nebular/theme';
+<% } %>
+import { <%= toPascal(name) %>ListComponent } from './<%= kebab %>-list.component';
+import { <%= toPascal(name) %>FormComponent } from './<%= kebab %>-form.component';
+
+const routes: Routes = [
+  { path: '', component: <%= toPascal(name) %>ListComponent },
+  { path: 'new', component: <%= toPascal(name) %>FormComponent },
+  { path: ':id', component: <%= toPascal(name) %>FormComponent }
+];
+
+@NgModule({
+  declarations: [<%= toPascal(name) %>ListComponent, <%= toPascal(name) %>FormComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule.forChild(routes),
+    <% if (enableAdmin) { %>
+    NbCardModule, NbButtonModule, NbInputModule,
+    <% } %>
+  ]
+})
+export class <%= toPascal(name) %>Module { }

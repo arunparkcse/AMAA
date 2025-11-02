@@ -1,0 +1,34 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { BehaviorSubject, tap } from 'rxjs';
+
+export interface AuthResponse {
+  token: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private tokenSubject = new BehaviorSubject<string | null>(localStorage.getItem('token'));
+  token$ = this.tokenSubject.asObservable();
+
+  constructor(private http: HttpClient, private router: Router) {}
+
+  login(email: string, password: string) {
+    return this.http.post<AuthResponse>('/api/auth/login', { email, password })
+      .pipe(tap(res => {
+        localStorage.setItem('token', res.token);
+        this.tokenSubject.next(res.token);
+      }));
+  }
+
+  logout() {
+    localStorage.removeItem('token');
+    this.tokenSubject.next(null);
+    this.router.navigate(['/login']);
+  }
+
+  isLoggedIn() {
+    return !!this.tokenSubject.value;
+  }
+}

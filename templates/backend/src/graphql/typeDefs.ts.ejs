@@ -1,0 +1,42 @@
+import { gql } from 'apollo-server-express';
+
+export const typeDefs = gql`
+  scalar DateTime
+  scalar Upload
+
+  <% entities.forEach(ent => { %>
+  type <%= toPascal(ent.name) %> {
+    id: ID!
+    <% ent.columns.forEach(col => { if (col.ui?.visible !== false) { %>
+    <%= col.name %>: <%= col.type === 'string' ? 'String' : col.type === 'integer' ? 'Int' : col.type === 'boolean' ? 'Boolean' : 'DateTime' %>
+    <% } }) %>
+    <% ent.computed?.forEach(c => { %>
+    <%= c.field %>: String
+    <% } ) %>
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    <% if (ent.softDelete) { %>deletedAt: DateTime<% } %>
+  }
+
+  input <%= toPascal(ent.name) %>Input {
+    <% ent.columns.forEach(col => { if (!col.primaryKey && col.ui?.visible !== false && col.ui?.input !== 'file') { %>
+    <%= col.name %>: <%= col.type === 'string' ? 'String' : col.type === 'integer' ? 'Int' : col.type === 'boolean' ? 'Boolean' : 'DateTime' %>
+    <% } }) %>
+  }
+  <% }) %>
+
+  type Query {
+    <% entities.forEach(ent => { %>
+    <%= toCamel(ent.name) %>s: [<%= toPascal(ent.name) %>!]!
+    <%= toCamel(ent.name) %>(id: ID!): <%= toPascal(ent.name) %>
+    <% }) %>
+  }
+
+  type Mutation {
+    <% entities.forEach(ent => { %>
+    create<%= toPascal(ent.name) %>(input: <%= toPascal(ent.name) %>Input!, file: Upload): <%= toPascal(ent.name) %>!
+    update<%= toPascal(ent.name) %>(id: ID!, input: <%= toPascal(ent.name) %>Input!, file: Upload): <%= toPascal(ent.name) %>!
+    delete<%= toPascal(ent.name) %>(id: ID!): Boolean!
+    <% }) %>
+  }
+`;

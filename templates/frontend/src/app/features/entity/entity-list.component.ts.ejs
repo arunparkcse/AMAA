@@ -1,0 +1,23 @@
+import { Component, OnInit } from '@angular/core';
+import { <%= toPascal(name) %>Service } from './<%= kebab %>.service';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: '<%= kebab %>-list',
+  templateUrl: './<%= kebab %>-list.component.html'
+})
+export class <%= toPascal(name) %>ListComponent implements OnInit {
+  items: any[] = [];
+
+  constructor(private service: <%= toPascal(name) %>Service, private router: Router) {}
+
+  ngOnInit() {
+    this.service.getAll().subscribe(res => this.items = res.data?.<%= toCamel(name) %>s || res);
+  }
+
+  delete(id: number) {
+    if (confirm('Delete?')) {
+      this.service.delete(id).subscribe(() => this.ngOnInit());
+    }
+  }
+}

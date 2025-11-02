@@ -1,0 +1,28 @@
+import { Component, OnInit } from '@angular/core';
+<% entities.forEach(ent => { %>
+import { <%= toPascal(ent.name) %>Service } from '../../features/<%= toKebab(ent.name) %>/<%= toKebab(ent.name) %>.service';
+<% }) %>
+
+@Component({
+  selector: 'app-dashboard',
+  templateUrl: './dashboard.component.html'
+})
+export class DashboardComponent implements OnInit {
+  <% entities.forEach(ent => { %>
+  <%= toCamel(ent.name) %>Count = 0;
+  <% }) %>
+
+  constructor(
+    <% entities.forEach(ent => { %>
+    private <%= toCamel(ent.name) %>Service: <%= toPascal(ent.name) %>Service,
+    <% }) %>
+  ) {}
+
+  ngOnInit() {
+    <% entities.forEach(ent => { %>
+    this.<%= toCamel(ent.name) %>Service.getAll().subscribe(res => {
+      this.<%= toCamel(ent.name) %>Count = (res.data?.<%= toCamel(ent.name) %>s || res).length;
+    });
+    <% }) %>
+  }
+}

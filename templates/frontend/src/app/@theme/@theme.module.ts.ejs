@@ -1,0 +1,8 @@
+import { NgModule } from '@angular/core';
+import { NbThemeModule } from '@nebular/theme';
+
+@NgModule({
+  imports: [NbThemeModule.forRoot({ name: 'default' })],
+  exports: [NbThemeModule]
+})
+export class ThemeModule { }

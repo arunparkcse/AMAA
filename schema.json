@@ -1,0 +1,90 @@
+{
+  "projectName": "BlogApp",
+  "database": "postgres",
+  "dbDev": "sqlite",
+  "dbTest": "sqlite",
+  "authEntity": "User",
+  "graphql": true,
+  "docker": true,
+  "ci": true,
+  "terraform": false,
+  "adminPanel": true,
+  "entities": [
+    {
+      "name": "User",
+      "tableName": "users",
+      "softDelete": true,
+      "searchable": ["email", "fullName"],
+      "columns": [
+        { "name": "id", "type": "increments", "primaryKey": true },
+        { "name": "email", "type": "string", "unique": true, "required": true, "ui": { "visible": true, "input": "email" } },
+        { "name": "password", "type": "string", "required": true, "ui": { "visible": false } },
+        { "name": "fullName", "type": "string", "required": true, "ui": { "visible": true, "input": "text" } },
+        { "name": "avatar", "type": "string", "ui": { "visible": true, "input": "file" } },
+        {
+          "name": "role",
+          "type": "string",
+          "required": true,
+          "default": "user",
+          "ui": {
+            "visible": true,
+            "input": "select",
+            "options": [
+              { "value": "admin", "display": "Admin" },
+              { "value": "user", "display": "User" }
+            ]
+          }
+        },
+        { "name": "isActive", "type": "boolean", "default": true, "ui": { "visible": true, "input": "checkbox" } },
+        { "name": "deletedAt", "type": "dateTime", "ui": { "visible": false } }
+      ],
+      "computed": [
+        { "field": "displayName", "code": "return instance.fullName || instance.email;" },
+        { "field": "initials", "code": "return (instance.fullName || '').split(' ').map(n => n[0]).join('').toUpperCase();" }
+      ],
+      "hooks": [
+        { "event": "beforeCreate", "code": "instance.password = await bcrypt.hash(instance.password, 10);" },
+        { "event": "beforeUpdate", "code": "if (instance.changed('password')) instance.password = await bcrypt.hash(instance.password, 10);" },
+        { "event": "afterFind", "code": "if (instance && instance.avatar) instance.avatar = `${process.env.APP_URL || ''}/uploads/${path.basename(instance.avatar)}`;" }
+      ],
+      "methods": [
+        { "name": "getPublicProfile", "code": "return { id: this.id, fullName: this.fullName, avatar: this.avatar, displayName: this.displayName };" }
+      ]
+    },
+    {
+      "name": "Post",
+      "tableName": "posts",
+      "softDelete": true,
+      "searchable": ["title", "content"],
+      "columns": [
+        { "name": "id", "type": "increments", "primaryKey": true },
+        { "name": "title", "type": "string", "required": true, "ui": { "visible": true, "input": "text" } },
+        { "name": "slug", "type": "string", "unique": true, "ui": { "visible": false } },
+        { "name": "content", "type": "text", "required": true, "ui": { "visible": true, "input": "textarea" } },
+        { "name": "image", "type": "string", "ui": { "visible": true, "input": "file" } },
+        { "name": "published", "type": "boolean", "default": false, "ui": { "visible": true, "input": "checkbox" } },
+        {
+          "name": "authorId",
+          "type": "integer",
+          "references": "User",
+          "ui": {
+            "visible": true,
+            "input": "select",
+            "foreign": { "table": "User", "valueField": "id", "displayField": "fullName" }
+          }
+        },
+        { "name": "deletedAt", "type": "dateTime", "ui": { "visible": false } }
+      ],
+      "relationships": [
+        { "type": "belongsTo", "target": "User", "foreignKey": "authorId" }
+      ],
+      "computed": [
+        { "field": "slug", "from": "title", "code": "return instance.title.toLowerCase().replace(/ /g, '-').replace(/[^\\w-]+/g, '');" },
+        { "field": "readingTime", "code": "const words = instance.content.split(' ').length; return Math.ceil(words / 200) + ' min read';" }
+      ],
+      "hooks": [
+        { "event": "beforeSave", "code": "if (instance.changed('title') && !instance.slug) instance.slug = instance.generateSlug();" }
+      ]
+    }
+  ]
+}

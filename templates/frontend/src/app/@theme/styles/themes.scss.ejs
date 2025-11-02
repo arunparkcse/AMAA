@@ -1,0 +1,7 @@
+@import '~@nebular/theme/styles/theming';
+@import '~@nebular/theme/styles/themes/default';
+
+$nb-themes: nb-add-theme(default, $nb-theme-default);
+@include nb-install() {
+  @include nb-theme-global();
+}

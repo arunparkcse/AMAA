@@ -1,0 +1,59 @@
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+ leisurely
+import { <%= toPascal(name) %>Service } from './<%= kebab %>.service';
+
+@Component({
+  selector: '<%= kebab %>-form',
+  templateUrl: './<%= kebab %>-form.component.html'
+})
+export class <%= toPascal(name) %>FormComponent implements OnInit {
+  form = this.fb.group({});
+  isEdit = false;
+  file: File | null = null;
+
+  constructor(
+    private fb: FormBuilder,
+    private service: <%= toPascal(name) %>Service,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
+    this.buildForm();
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.isEdit = true;
+      this.service.get(+id).subscribe(data => this.form.patchValue(data));
+    }
+  }
+
+  buildForm() {
+    const controls: any = {};
+    <% ent.columns.forEach(col => { if (col.ui?.visible !== false && col.ui?.input !== 'file') { %>
+    controls['<%= col.name %>'] = ['', <%= col.required ? 'Validators.required' : '' %>];
+    <% } }) %>
+    this.form = this.fb.group(controls);
+  }
+
+  onFile(event: any) {
+    this.file = event.target.files[0];
+  }
+
+  getType(input?: string) {
+    return input === 'email' ? 'email' : input === 'password' ? 'password' : 'text';
+  }
+
+  submit() {
+    const formData = new FormData();
+    Object.keys(this.form.value).forEach(k => formData.append(k, this.form.value[k]));
+    if (this.file) formData.append('file', this.file);
+
+    const obs = this.isEdit
+      ? this.service.update(+this.route.snapshot.paramMap.get('id')!, formData)
+      : this.service.create(formData);
+
+    obs.subscribe(() => this.router.navigate(['..']));
+  }
+}

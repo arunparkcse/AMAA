@@ -1,0 +1,29 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+<% if (enableGraphQL) { %>
+import { Apollo } from 'apollo-angular';
+import gql from 'graphql-tag';
+<% } %>
+
+@Injectable({ providedIn: 'root' })
+export class <%= toPascal(name) %>Service {
+  private api = '/api/<%= toKebab(name) %>';
+  <% if (enableGraphQL) { %>
+  private GET_ALL = gql`query { <%= toCamel(name) %>s { id <% ent.columns.forEach(c => { if (c.ui?.visible) { %> <%= c.name %> <% } }) %> } }`;
+  <% } %>
+
+  constructor(
+    private http: HttpClient
+    <% if (enableGraphQL) { %>, private apollo: Apollo <% } %>
+  ) {}
+
+  <% if (enableGraphQL) { %>
+  getAll() { return this.apollo.watchQuery({ query: this.GET_ALL }).valueChanges; }
+  <% } else { %>
+  getAll() { return this.http.get<any[]>(this.api); }
+  get(id: number) { return this.http.get<any>(`${this.api}/${id}`); }
+  create(data: any) { return this.http.post(this.api, data); }
+  update(id: number, data: any) { return this.http.put(`${this.api}/${id}`, data); }
+  delete(id: number) { return this.http.delete(`${this.api}/${id}`); }
+  <% } %>
+}

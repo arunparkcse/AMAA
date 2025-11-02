@@ -1,0 +1,20 @@
+import { Component } from '@angular/core';
+<% if (enableAdmin) { %>
+import { NbMenuItem } from '@nebular/theme';
+<% } %>
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html'
+})
+export class AppComponent {
+  <% if (enableAdmin) { %>
+  menuItems: NbMenuItem[] = [
+    { title: 'Dashboard', link: '/pages/dashboard', icon: 'home-outline' },
+    <% entities.forEach(ent => { %>
+    { title: '<%= toPascal(ent.name) %>', link: '/pages/<%= toKebab(ent.name) %>', icon: 'grid-outline' },
+    <% }) %>
+    { title: 'Logout', link: '/login', icon: 'log-out-outline' }
+  ];
+  <% } %>
+}

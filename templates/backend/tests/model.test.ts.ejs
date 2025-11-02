@@ -1,0 +1,36 @@
+import { <%= toPascal(ent.name) %> } from '../src/models/<%= ent.name %>';
+import { sequelize } from '../src/config/database';
+import bcrypt from 'bcryptjs';
+
+beforeAll(async () => {
+  await sequelize.sync({ force: true });
+});
+
+afterAll(async () => {
+  await sequelize.close();
+});
+
+describe('<%= toPascal(ent.name) %> Model', () => {
+  it('should create a <%= ent.name %>', async () => {
+    const data: any = {
+      <% ent.columns.forEach(col => { if (!col.primaryKey && col.name !== 'password') { %>
+      <%= col.name %>: '<%= col.name === 'email' ? 'test@example.com' : col.name === 'fullName' ? 'Test User' : col.default !== undefined ? col.default : 'test' %>',
+      <% } }) %>
+      password: 'password123'
+    };
+
+    const instance = await <%= toPascal(ent.name) %>.create(data);
+    expect(instance.id).toBeDefined();
+    expect(instance.email).toBe('test@example.com');
+    const valid = await bcrypt.compare('password123', instance.password);
+    expect(valid).toBe(true);
+  });
+
+  <% if (ent.computed) { %>
+  it('should compute fields', async () => {
+    const instance = await <%= toPascal(ent.name) %>.create({ fullName: 'John Doe', email: 'john@example.com', password: 'pass' });
+    expect(instance.displayName).toBe('John Doe');
+    expect(instance.initials).toBe('JD');
+  });
+  <% } %>
+});
