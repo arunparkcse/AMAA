@@ -41,7 +41,7 @@ export class <%= toPascal(ent.name) %> extends Model {
   <% ent.hooks?.forEach(h => { %>
   @<%= h.event.charAt(0).toUpperCase() + h.event.slice(1) %>
   static async <%= h.event %>(instance: <%= toPascal(ent.name) %>) {
-    <%- h.code.replace(/instance\./g, 'this.') %>
+    <%- h.code.replace(/instance\./g, 'instance.') %>
   }
   <% }) %>
 }
@@ -50,3 +50,5 @@ export class <%= toPascal(ent.name) %> extends Model {
 <% ent.relationships?.forEach(r => { %>
 <%= toPascal(ent.name) %>.<%= r.type %>(require('./<%= toKebab(r.target) %>'));
 <% }) %>
+
+module.exports = <%= toPascal(ent.name) %>;

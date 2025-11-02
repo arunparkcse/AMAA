@@ -1,26 +1,28 @@
 import { QueryInterface, DataTypes } from 'sequelize';
 
-export async function up(queryInterface: QueryInterface) {
-  await queryInterface.createTable('<%= ent.tableName || toKebab(ent.name) + "s" %>', {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true
-    },
-    <% ent.columns.forEach(col => { if (!col.primaryKey) { %>
-    <%= col.name %>: {
-      type: DataTypes.<%= col.type.toUpperCase() === 'INCREMENTS' ? 'INTEGER' : col.type.toUpperCase() === 'TEXT' ? 'TEXT' : col.type.toUpperCase() %>,
-      allowNull: <%= !col.required %>,
-      <% if (col.unique) { %>unique: true,<% } %>
-      <% if (col.default !== undefined) { %>defaultValue: <%= JSON.stringify(col.default) %>,<% } %>
-    },
-    <% } }) %>
-    createdAt: { type: DataTypes.DATE, allowNull: false },
-    updatedAt: { type: DataTypes.DATE, allowNull: false },
-    <% if (ent.softDelete) { %>deletedAt: { type: DataTypes.DATE, allowNull: true }<% } %>
-  });
-}
+module.exports = {
+  up: async (queryInterface: QueryInterface) => {
+    await queryInterface.createTable('<%= ent.tableName || toKebab(ent.name) + "s" %>', {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      <% ent.columns.forEach(col => { if (!col.primaryKey) { %>
+      <%= col.name %>: {
+        type: DataTypes.<%= col.type.toUpperCase() === 'INCREMENTS' ? 'INTEGER' : col.type.toUpperCase() === 'TEXT' ? 'TEXT' : col.type.toUpperCase() %>,
+        allowNull: <%= !col.required %>,
+        <% if (col.unique) { %>unique: true,<% } %>
+        <% if (col.default !== undefined) { %>defaultValue: <%= JSON.stringify(col.default) %>,<% } %>
+      },
+      <% } }) %>
+      createdAt: { type: DataTypes.DATE, allowNull: false },
+      updatedAt: { type: DataTypes.DATE, allowNull: false },
+      <% if (ent.softDelete) { %>deletedAt: { type: DataTypes.DATE, allowNull: true }<% } %>
+    });
+  },
 
-export async function down(queryInterface: QueryInterface) {
-  await queryInterface.dropTable('<%= ent.tableName || toKebab(ent.name) + "s" %>');
-}
+  down: async (queryInterface: QueryInterface) => {
+    await queryInterface.dropTable('<%= ent.tableName || toKebab(ent.name) + "s" %>');
+  }
+};
