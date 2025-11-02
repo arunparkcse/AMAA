@@ -1,5 +1,5 @@
 {
-  "name": "<%= projectName %>-backend",
+  "name": "<%= schema.projectName %>-backend",
   "version": "1.0.0",
   "scripts": {
     "build": "tsc",
@@ -22,7 +22,7 @@
     "express-rate-limit": "^7.1.5",
     "dotenv": "^16.3.1",
     "express-validator": "^7.0.1",
-    <% if (enableGraphQL) { %>"apollo-server-express": "^3.13.0","graphql": "^16.8.1",<% } %>
+    <% if (schema.graphql) { %>"apollo-server-express": "^3.13.0","graphql": "^16.8.1","graphql-upload": "^13.0.0",<% } %>
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {

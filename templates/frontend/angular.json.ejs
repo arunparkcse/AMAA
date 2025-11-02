@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "<%= projectName %>": {
+    "<%= schema.projectName %>": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": { "style": "scss" }
@@ -15,7 +15,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/<%= projectName %>",
+            "outputPath": "dist/<%= schema.projectName %>",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": ["src/polyfills.ts"],

@@ -108,10 +108,10 @@ if (terraform) {
 // ---------------------------------------------------------------------
 // BACKEND
 // ---------------------------------------------------------------------
-render('backend/package.json.ejs', `${BACK}/package.json`, { schema, enableGraphQL, enableDocker, enableCI, enableTerraform, enableAdmin });
+render('backend/package.json.ejs', `${BACK}/package.json`, { schema });
 render('backend/tsconfig.json.ejs', `${BACK}/tsconfig.json`, {});
 render('backend/.env.example', `${BACK}/.env.example`, { schema });
-render('backend/src/server.ts.ejs', `${BACK}/src/server.ts`, { schema, enableGraphQL, enableAdmin });
+render('backend/src/server.ts.ejs', `${BACK}/src/server.ts`, { schema });
 
 render('backend/src/config/database.ts.ejs', `${BACK}/src/config/database.ts`, { dbDev, dbTest });
 render('backend/src/middleware/auth.ts.ejs', `${BACK}/src/middleware/auth.ts`, { authEntity });
@@ -127,12 +127,10 @@ for (const ent of entities) {
 
 // Controllers + routes
 for (const ent of entities) {
-  const name = ent.name;
-  const kebab = toKebab(name);
-  render('backend/src/controllers/controller.ts.ejs', `${BACK}/src/controllers/${name}Controller.ts`, { ent, schema, enableGraphQL });
-  render('backend/src/routes/route.ts.ejs', `${BACK}/src/routes/${kebab}.ts`, { ent, schema, enableGraphQL });
+  render('backend/src/controllers/controller.ts.ejs', `${BACK}/src/controllers/${ent.name}Controller.ts`, { ent, schema });
+  render('backend/src/routes/route.ts.ejs', `${BACK}/src/routes/${toKebab(ent.name)}.ts`, { ent, schema });
 }
-render('backend/src/routes/index.ts.ejs', `${BACK}/src/routes/index.ts`, { entities, enableGraphQL });
+render('backend/src/routes/index.ts.ejs', `${BACK}/src/routes/index.ts`, { entities, schema });
 
 if (enableGraphQL) {
   render('backend/src/graphql/typeDefs.ts.ejs', `${BACK}/src/graphql/typeDefs.ts`, { entities });
@@ -142,8 +140,8 @@ if (enableGraphQL) {
 // ---------------------------------------------------------------------
 // FRONTEND
 // ---------------------------------------------------------------------
-render('frontend/package.json.ejs', `${FRONT}/package.json`, { schema, enableGraphQL, enableAdmin });
-render('frontend/angular.json.ejs', `${FRONT}/angular.json`, { projectName, enableAdmin });
+render('frontend/package.json.ejs', `${FRONT}/package.json`, { schema });
+render('frontend/angular.json.ejs', `${FRONT}/angular.json`, { projectName, schema });
 render('frontend/tsconfig.json.ejs', `${FRONT}/tsconfig.json`, {});
 render('frontend/src/index.html.ejs', `${FRONT}/src/index.html`, { projectName });
 render('frontend/src/main.ts.ejs', `${FRONT}/src/main.ts`, { enableAdmin, enableGraphQL });
